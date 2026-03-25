@@ -1,0 +1,43 @@
+---
+description: Ancestral só para cadastro pai e pai-filho; mestre-detalhe; Excel export/import no ancestral
+globs: "**/*.pas,**/*.dfm"
+alwaysApply: false
+---
+
+#### Formulário ancestral — escopo e nomenclatura
+
+- As classes ancestrais do projeto seguem o padrão de `delphi-nova-tela.mdc`:
+  - Cadastro de **entidade única (pai)**: herdar de `TfrmCadastroPai` (unit `uFrmCadastroPai`).
+  - Cadastro **mestre-detalhe (pai-filho)**: herdar de `TfrmCadastroPaiFilho` (unit `uFrmCadastroPaiFilho`).
+  - Formas herdadas seguem o padrão `Tfrm` + nome: ex. `TfrmCliente`, `TfrmNfe`.
+
+- Utilizar **herança de formulário (ancestral)** apenas para:
+  - **Cadastro pai**: uma entidade única (sem grid de filhos ligados por FK).
+  - **Cadastro pai-filho**: uma entidade **mestre** e uma ou mais entidades **detalhe** ligadas por chave estrangeira (`id_*` conforme padrão do banco).
+
+- Não introduzir ancestral para listagens “só consulta”, wizards ou telas que não se enquadrem nesses dois modelos, salvo decisão explícita de arquitetura documentada no projeto.
+
+#### Ancestral — exportação e importação Excel
+
+- O formulário **ancestral** deve concentrar a **exportação** para Excel e a **importação** a partir de Excel (ações de barra, menu ou botões herdados), para que **todos os cadastros** que herdam o ancestral ofereçam o mesmo fluxo, sem duplicar implementação em cada filho.
+- **Exportação**: gerar arquivo compatível com Excel (ex.: `.xlsx` pela biblioteca padrão do projeto; se usar `.csv`, documentar encoding e separador). Exportar o escopo coerente com a tela (mestre, detalhe ou ambos — definir no ancestral ou em hook/virtual methods que o filho implemente).
+- **Importação**: validar cabeçalhos, tipos, obrigatoriedade e FKs antes de gravar; preferir **transação** (commit só se o lote for válido ou conforme política do módulo) e relatório ao usuário (linhas importadas, ignoradas, erros).
+- Telas **filhas** implementam apenas o que for específico (mapeamento coluna↔campo, dataset alvo, regras extras), reutilizando ganchos do ancestral.
+
+#### Mestre — navegação
+
+- O **usuário navega no mestre** (dataset principal do pai): `Prior` / `Next`, localizar, ou equivalente na UI.
+- Ao trocar o registro atual do mestre, o detalhe deve **atualizar** para refletir só os filhos daquele pai (filtro por FK do registro atual, query parametrizada, ou `MasterSource`/`MasterFields` coerentes com o modelo de dados).
+
+#### Detalhe — grid e operações
+
+- O **grid (ou lista) do filho** exibe **somente** registros cujo FK aponta para o **registro atual do mestre**.
+- **Inserir** no detalhe: cria apenas registro **filho**; preencher automaticamente a FK do pai com o ID do mestre atual; **não** criar nem duplicar registro de mestre por ação do detalhe.
+- **Excluir** no detalhe: remove **apenas** o registro filho selecionado (ou marcados no detalhe); **não** excluir o mestre salvo fluxo explícito e confirmado (fora do padrão desta regra).
+
+#### Implementação — verificação rápida
+
+- Ancestral com ações de **exportar** / **importar** Excel funcionais ou ganchos claramente implementados nos filhos.
+- Mestre e detalhe em datasets distintos; detalhe com `DataSource` / `SQL` / filtro amarrado ao **ID atual do mestre**.
+- Ao `Insert` no detalhe: atribuir FK do pai antes de `Post` quando o banco exigir.
+- Evitar `ApplyUpdates` único que misture mestre e detalhe sem ordem definida; respeitar integridade referencial (`RESTRICT` / regras do schema).

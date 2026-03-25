@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "guia-pratico": {
+      "command": "npx",
+      "args":[
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\mathe\\Desktop\\Aula IA\\Projeto Delphi\\guia-pratico"
+      ]
+    },
+    "doc-delphi": {
+      "command": "npx",
+      "args":[
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\mathe\\Desktop\\Aula IA\\Projeto Delphi\\doc-delphi"
+      ]
+    },
+    "ConexaoMysql": {
+      "command": "C:\\Users\\mathe\\Documents\\Embarcadero\\Studio\\Projects\\Curso\\ConexaoMysql\\Win64\\Debug\\ConexaoMysql.exe",
+      "args": ["select"]
+    },
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "mysql-mcp-server"],
+      "env": {
+        "MYSQL_HOST": "localhost",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "root",
+        "MYSQL_PASSWORD": "123456",
+        "MYSQL_DATABASE": "mellowup"
+      }
+    }
+  }
+}

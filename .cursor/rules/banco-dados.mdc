@@ -1,0 +1,33 @@
+---
+description: Regras obrigatórias para criação e alteração de tabelas MySQL no projeto — nomenclatura, tipos, FKs, índices, charset e versionamento
+alwaysApply: true
+globs: "**/*.sql"
+---
+
+#### Banco de dados MySQL — criação de tabelas e nomenclatura
+
+- **Nomenclatura de tabelas:**
+  - `snake_case` **em inglês**, singular: `customer`, `order_item`, `payment_type` (não `customers`).
+  - Prefixo de módulo quando o banco mistura domínios: `fin_transaction`, `inv_product`.
+  - Nunca usar palavras reservadas do MySQL (`order`, `group`, `key`); usar sinônimo (`purchase_order`).
+- **Nomenclatura de colunas:**
+  - `snake_case` **em inglês**, sem prefixo de tabela: `name`, `birth_date`, `total_amount`.
+  - Chave primária: `id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY`.
+  - Chave estrangeira: `id_` + nome da tabela referenciada: `id_customer`, `id_product` — também `INT UNSIGNED NOT NULL`.
+  - Auditoria obrigatória: `created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`, `updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`.
+- **Tipos de dados:**
+  - Textos curtos: `VARCHAR(n)` com tamanho justo; longos: `TEXT`.
+  - Monetário: `DECIMAL(15,2)` — nunca `FLOAT` ou `DOUBLE`.
+  - Datas: `DATE`, `DATETIME` ou `TIMESTAMP`; nunca `VARCHAR`.
+  - Booleano: `TINYINT(1)` com `0`/`1`.
+  - CPF: `VARCHAR(11)`; CNPJ: `VARCHAR(14)` — somente dígitos, sem máscara.
+- **Chaves e índices:**
+  - `INDEX` em toda coluna usada em `WHERE`, `JOIN` ou `ORDER BY` frequente.
+  - FK: `CONSTRAINT fk_<tabela>_<referencia> FOREIGN KEY (id_<referencia>) REFERENCES <referencia>(id)`.
+  - `ON DELETE RESTRICT` por padrão; `ON DELETE CASCADE` somente quando o filho não existe sem o pai.
+- **Engine, charset e collation:**
+  - Toda tabela: `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`.
+- **Scripts e boas práticas:**
+  - Usar `CREATE TABLE IF NOT EXISTS` e `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.
+  - Sempre `NOT NULL` ou `DEFAULT` explícito; evitar colunas anuláveis sem justificativa.
+  - Versionar scripts numerados em `sql/`: `001_create_customer.sql`, `002_add_column_status.sql`.

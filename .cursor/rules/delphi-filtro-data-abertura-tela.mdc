@@ -1,0 +1,18 @@
+---
+description: Telas ligadas a tabelas com colunas de data devem exigir filtro por data para abrir/carregar dados
+globs: "**/*.pas,**/*.dfm"
+alwaysApply: false
+---
+
+#### Tabelas com data — filtro obrigatório na abertura
+
+- Se a **tabela** (ou a consulta principal da tela) possuir coluna(s) de **data ou data/hora** (`DATE`, `DATETIME`, `TIMESTAMP`) usada(s) para **listagem, pesquisa ou período de negócio** (ex.: emissão, movimento, competência), a **tela não deve carregar** o dataset completo ao abrir sem critério.
+- Na **abertura** da tela (ou no primeiro refresh): exigir que o usuário informe **filtro por data** (intervalo inicial/final ou data única — conforme o caso do módulo). Até o filtro ser válido e confirmado (ou padrão explícito aplicado), manter lista vazia ou desabilitada e mensagem orientando o preenchimento.
+- **Evitar** `SELECT` sem `WHERE` em coluna de data em telas de consulta/listagem quando isso implicaria volume impraticável ou risco de performance; o filtro de data faz parte do contrato da tela.
+
+#### Implementação — verificação
+
+- Controles de período (`edDataIni` / `edDataFim` ou equivalente) visíveis na barra ou topo; query parametrizada com `>=` / `<=` (ou `BETWEEN`) nas colunas de data definidas pelo módulo.
+- **Valor padrão ao abrir:** preencher `edDataIni` com o **primeiro dia do mês atual** e `edDataFim` com a **data de hoje** — o usuário ajusta se precisar de outro período. Jamais abrir com campos de data em branco e lista vazia sem orientação.
+- Botão **Consultar** / **Aplicar filtro** (ou abrir só após informar datas): `Open`/`Refresh` do dataset principal somente após validação (datas preenchidas, início ≤ fim, limites máximos de intervalo se existirem no projeto).
+- Cadastro **por registro** (ficha) focado em um `id` pode não precisar de filtro de período na abertura; a regra aplica-se a **listagens e telas cujo propósito é navegar conjunto de registros no tempo**.

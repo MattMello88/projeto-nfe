@@ -1,0 +1,69 @@
+---
+description: Boas práticas para criar formulários Delphi (.pas/.dfm) e usá-los no projeto
+globs: "**/*.pas,**/*.dfm"
+alwaysApply: false
+---
+
+#### Formulários — criar e usar
+
+**Onde fica o quê**
+
+- Form: UI, fluxo de tela, eventos de controles e orquestração leve.
+- **DataModule** (`Tdm*`): conexão, queries, datasets e regras de persistência reutilizáveis.
+- **Classes de negócio** (`T*` em units próprias): cálculos e regras que não dependem de `TForm`.
+
+**Criação e dono (Owner)**
+
+- Preferir `TfrmXxx.Create(Owner)` com Owner coerente: formulário pai, `Application` ou `nil` quando o ciclo de vida for explícito.
+- Evitar `Application.CreateForm` para telas que não são “fixas” na aplicação; use criação sob demanda para reduzir acoplamento e memória.
+- Documentar no próprio form se a instância é **única** (singleton de tela) ou **descartável** após uso.
+
+**Modal x não modal**
+
+- Diálogo de confirmação / edição pontual: `ShowModal` e liberar com `Free` (ou padrão do projeto, ex. `Release` em eventos assíncronos).
+- Janelas de trabalho longo: `Show` sem bloquear; fechar com cuidado para não deixar referências penduradas em outros forms.
+
+**Passar dados entre telas**
+
+- Preferir **propriedades públicas** ou **métodos** (`AbrirParaCliente(Id: Integer)`) em vez de variáveis globais ou `FindComponent` em outro form.
+- Para desacoplar, usar **interfaces** ou callbacks em units sem referência circular entre forms.
+
+**Ciclo de vida e limpeza**
+
+- Inicialização pesada: preferir **lazy** (no primeiro uso) ou `OnShow` quando fizer sentido; evitar bloquear `OnCreate` com rede ou queries longas sem feedback.
+- Libere listas, objetos criados no form e assinaturas de eventos em `OnDestroy` / `destructor` quando necessário.
+- Em `OnCloseQuery` / `CanClose`: validar dados não salvos e confirmar com o usuário quando aplicável.
+
+**Queries e datasets**
+
+- `TQuery` / `TDataSet` **não** ficam no form; pertencem ao **DataModule** (`Tdm*`). O form só referencia via `DataSource`.
+- Exceptions de banco tratadas no DataModule ou no serviço de negócio; o form exibe mensagem amigável sem mostrar erro técnico bruto.
+
+**Validação e persistência**
+
+- Validar campos obrigatórios e formatos **antes** de gravar; mensagens claras e foco no controle com erro.
+- `Post`/`ApplyUpdates` via camada de dados (DataModule); tratar exceções e não deixar o form em estado inconsistente.
+- Em diálogos modais: `btnSalvar` define `ModalResult := mrOk` (após validação e gravação bem-sucedida); `btnCancelar` define `ModalResult := mrCancel`. Não fechar manualmente com `Close` quando `ModalResult` resolve.
+
+**Acoplamento e units**
+
+- Manter `uses` enxuto; evitar que dois forms se importem mutuamente — extrair tipos compartilhados para uma unit comum se preciso.
+- Alinhar com o padrão de nomenclatura em `delphi-nova-tela.mdc` (`Tfrm*`, `uFrm*`, `btn*`, `ed*`, `qry*`, `ds*`).
+
+**Exemplo — form descartável após modal**
+
+```pascal
+procedure TfrmMain.btnEditarClick(Sender: TObject);
+var
+  L: TfrmCliente;
+begin
+  L := TfrmCliente.Create(Self);
+  try
+    L.IdCliente := FIdSelecionado;
+    if L.ShowModal = mrOk then
+      qryLista.Refresh;
+  finally
+    L.Free;
+  end;
+end;
+```

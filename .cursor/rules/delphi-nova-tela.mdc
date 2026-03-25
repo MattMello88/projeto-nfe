@@ -1,0 +1,26 @@
+---
+description: Padrão de nomenclatura obrigatório para formulários, DataModules, componentes visuais, queries e classes em Delphi
+alwaysApply: true
+globs: "**/*.pas,**/*.dfm"
+---
+
+#### Padrão de nomenclatura
+
+| Elemento | Padrão | Exemplo |
+|----------|--------|---------|
+| Formulários | `Tfrm` + nome descritivo | `TfrmCliente`, `TfrmProduto` |
+| Formulário ancestral | `TfrmCadastro` + variação | `TfrmCadastroPai`, `TfrmCadastroPaiFilho` |
+| DataModules | `Tdm` + nome | `TdmPrincipal`, `TdmVendas` |
+| Units | prefixo do tipo + nome | `uFrmCliente`, `uDmPrincipal` |
+| Classes de negócio | `T` + nome singular | `TCliente`, `TPedido` |
+| Botões | `btn` + ação | `btnSalvar`, `btnCancelar` |
+| Edits | `ed` + nome do campo | `edNome`, `edEmail` |
+| Labels | `lbl` + nome | `lblNome`, `lblCodigo` |
+| CheckBoxes | `chk` + nome | `chkAtivo`, `chkImpresso` |
+| ComboBoxes | `cmb` + nome | `cmbSituacao`, `cmbTipo` |
+| Lookup (busca FK) | `lkp` + entidade | `lkpCliente`, `lkpProduto` |
+| Grids | `grd` + nome | `grdItens`, `grdPedido` |
+| Panels | `pnl` + função | `pnlFiltro`, `pnlRodape` |
+| PageControl / TabSheet | `pgc` / `tab` + nome | `pgcCadastro`, `tabEndereco` |
+| Actions | `act` + ação | `actSalvar`, `actExportar` |
+| Queries/Datasets | `qry` / `ds` + nome | `qryCliente`, `dsCliente` |

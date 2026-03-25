@@ -1,0 +1,27 @@
+---
+description: Usar componentes lookup de busca para campos de referência (FK) em formulários Delphi
+globs: "**/*.pas,**/*.dfm"
+alwaysApply: false
+---
+
+#### Referências (FK) — lookup de busca
+
+- Para colunas que são **chave estrangeira** (`id_*` no banco, alinhado ao padrão do schema), a tela deve usar **componente de lookup com busca**, não `TEdit` livre para digitar ID nem código sem validação.
+- Padrão esperado: controle ligado ao campo FK do dataset (`DataField` = `id_entidade_referenciada`) com **lista/dropdown** alimentada por dataset auxiliar (query na tabela referenciada ou view de cadastro).
+- O usuário **localiza pelo que faz sentido na UI** (código, nome, documento): filtro incremental, autocomplete ou diálogo de pesquisa, conforme o componente padrão do projeto — o valor gravado continua sendo o **`id_*`** no registro atual.
+
+#### Dados do lookup
+
+- Dataset do lookup: `SELECT` enxuto (chave + colunas de exibição); índice ou `ORDER BY` coerente com a lista.
+- `KeyField` / `ListField` (ou equivalente no framework) apontando para a **PK** da tabela referenciada e para o(s) campo(s) exibidos.
+- Evitar carregar catálogos enormes sem filtro; usar parâmetros ou busca sob demanda quando aplicável.
+
+#### Formulários
+
+- Em cadastro **pai-filho**, lookups do **mestre** resolvem FKs do pai; no **detalhe**, cada FK do item usa seu próprio lookup (ex.: produto, CFOP), respeitando o registro atual do filho.
+- Não duplicar lógica de “achar ID pelo texto” espalhada em eventos — centralizar no padrão lookup + dataset auxiliar ou serviço reutilizável.
+
+#### Verificação
+
+- Campo `id_*` no form: existe `DataSource` + controle lookup (ou padrão aprovado equivalente) com validação implícita pela escolha na lista.
+- Se o lookup permitir valor vazio, alinhar com `NULL` / `NOT NULL` da coluna no banco.
