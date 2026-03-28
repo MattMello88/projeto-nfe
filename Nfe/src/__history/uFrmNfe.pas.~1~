@@ -1,0 +1,270 @@
+unit uFrmNfe;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages,
+  System.SysUtils, System.Variants, System.Classes, System.DateUtils,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ExtCtrls, Vcl.DBCtrls, Vcl.DBGrids, Vcl.ComCtrls,
+  Vcl.StdCtrls, Vcl.Buttons, Vcl.Grids,
+  Data.DB,
+  uFrmCadastroPaiFilho;
+
+type
+  TfrmNfe = class(TfrmCadastroPaiFilho)
+    pnlFiltro: TPanel;
+    lblDataIni: TLabel;
+    lblDataFim: TLabel;
+    edDataIni: TDateTimePicker;
+    edDataFim: TDateTimePicker;
+    btnConsultar: TButton;
+    pgcNfe: TPageControl;
+    tabIdentificacao: TTabSheet;
+    lblSerie: TLabel;
+    lblNumNf: TLabel;
+    lblDhEmi: TLabel;
+    lblNatOp: TLabel;
+    lblTpNf: TLabel;
+    lblTpAmb: TLabel;
+    lblFinNfe: TLabel;
+    edSerie: TDBEdit;
+    edNumNf: TDBEdit;
+    edDhEmi: TDBEdit;
+    edNatOp: TDBEdit;
+    edTpNf: TDBEdit;
+    edTpAmb: TDBEdit;
+    edFinNfe: TDBEdit;
+    tabEmitente: TTabSheet;
+    lblEmitCnpj: TLabel;
+    lblEmitNome: TLabel;
+    lblEmitFant: TLabel;
+    lblEmitIe: TLabel;
+    lblEmitCrt: TLabel;
+    edEmitCnpj: TDBEdit;
+    edEmitNome: TDBEdit;
+    edEmitFant: TDBEdit;
+    edEmitIe: TDBEdit;
+    edEmitCrt: TDBEdit;
+    tabDestinatario: TTabSheet;
+    lblDestCnpj: TLabel;
+    lblDestCpf: TLabel;
+    lblDestNome: TLabel;
+    lblDestIe: TLabel;
+    lblDestEmail: TLabel;
+    edDestCnpj: TDBEdit;
+    edDestCpf: TDBEdit;
+    edDestNome: TDBEdit;
+    edDestIe: TDBEdit;
+    edDestEmail: TDBEdit;
+    tabTotais: TTabSheet;
+    lblTotVBc: TLabel;
+    lblTotVIcms: TLabel;
+    lblTotVProd: TLabel;
+    lblTotVNf: TLabel;
+    edTotVBc: TDBEdit;
+    edTotVIcms: TDBEdit;
+    edTotVProd: TDBEdit;
+    edTotVNf: TDBEdit;
+    tabTransporte: TTabSheet;
+    lblModFrete: TLabel;
+    lblTranspNome: TLabel;
+    lblTranspIe: TLabel;
+    edModFrete: TDBEdit;
+    edTranspNome: TDBEdit;
+    edTranspIe: TDBEdit;
+    tabCobranca: TTabSheet;
+    pnlFatura: TPanel;
+    lblFatNFat: TLabel;
+    lblFatVOrig: TLabel;
+    lblFatVDesc: TLabel;
+    lblFatVLiq: TLabel;
+    edFatNFat: TDBEdit;
+    edFatVOrig: TDBEdit;
+    edFatVDesc: TDBEdit;
+    edFatVLiq: TDBEdit;
+    grdDuplicatas: TDBGrid;
+    tabPagamentos: TTabSheet;
+    grdPagamentos: TDBGrid;
+    tabProtocolo: TTabSheet;
+    lblProtNProt: TLabel;
+    lblProtDhRecbto: TLabel;
+    lblProtCStat: TLabel;
+    lblProtXMotivo: TLabel;
+    edProtNProt: TDBEdit;
+    edProtDhRecbto: TDBEdit;
+    edProtCStat: TDBEdit;
+    edProtXMotivo: TDBEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnConsultarClick(Sender: TObject);
+  protected
+    procedure DoSalvar; override;
+    function ValidarCampos: Boolean; override;
+  private
+    FdmNfe: TObject;
+    procedure ConfigurarBindings;
+    procedure InicializarFiltro;
+  public
+  end;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  uDmNfe,
+  uDmPrincipal;
+
+{ TfrmNfe }
+
+procedure TfrmNfe.FormCreate(Sender: TObject);
+var
+  LDm: TdmNfe;
+begin
+  LDm := TdmNfe.Create(Self);
+  FdmNfe := LDm;
+
+  // Conecta os DataSources herdados do ancestral ao mestre e detalhe do DM
+  dsMestre.DataSet  := LDm.qryNfe;
+  dsDetalhe.DataSet := LDm.qryNfeDet;
+
+  ConfigurarBindings;
+  InicializarFiltro;
+
+  inherited FormCreate(Sender);
+end;
+
+procedure TfrmNfe.FormDestroy(Sender: TObject);
+begin
+  if Assigned(FdmNfe) then
+    TdmNfe(FdmNfe).Free;
+end;
+
+procedure TfrmNfe.ConfigurarBindings;
+var
+  LDm: TdmNfe;
+begin
+  LDm := TdmNfe(FdmNfe);
+
+  // tabIdentificacao — dsNfeIde
+  edSerie.DataSource    := LDm.dsNfeIde;
+  edNumNf.DataSource    := LDm.dsNfeIde;
+  edDhEmi.DataSource    := LDm.dsNfeIde;
+  edNatOp.DataSource    := LDm.dsNfeIde;
+  edTpNf.DataSource     := LDm.dsNfeIde;
+  edTpAmb.DataSource    := LDm.dsNfeIde;
+  edFinNfe.DataSource   := LDm.dsNfeIde;
+
+  // tabEmitente — dsNfeEmit
+  edEmitCnpj.DataSource := LDm.dsNfeEmit;
+  edEmitNome.DataSource := LDm.dsNfeEmit;
+  edEmitFant.DataSource := LDm.dsNfeEmit;
+  edEmitIe.DataSource   := LDm.dsNfeEmit;
+  edEmitCrt.DataSource  := LDm.dsNfeEmit;
+
+  // tabDestinatario — dsNfeDest
+  edDestCnpj.DataSource := LDm.dsNfeDest;
+  edDestCpf.DataSource  := LDm.dsNfeDest;
+  edDestNome.DataSource := LDm.dsNfeDest;
+  edDestIe.DataSource   := LDm.dsNfeDest;
+  edDestEmail.DataSource := LDm.dsNfeDest;
+
+  // tabTotais — dsNfeTotal (somente leitura)
+  edTotVBc.DataSource   := LDm.dsNfeTotal;
+  edTotVIcms.DataSource := LDm.dsNfeTotal;
+  edTotVProd.DataSource := LDm.dsNfeTotal;
+  edTotVNf.DataSource   := LDm.dsNfeTotal;
+
+  // tabTransporte — dsNfeTransp
+  edModFrete.DataSource   := LDm.dsNfeTransp;
+  edTranspNome.DataSource := LDm.dsNfeTransp;
+  edTranspIe.DataSource   := LDm.dsNfeTransp;
+
+  // tabCobranca — dsNfeCobrFat + grdDuplicatas → dsNfeCobrDup
+  edFatNFat.DataSource  := LDm.dsNfeCobrFat;
+  edFatVOrig.DataSource := LDm.dsNfeCobrFat;
+  edFatVDesc.DataSource := LDm.dsNfeCobrFat;
+  edFatVLiq.DataSource  := LDm.dsNfeCobrFat;
+  grdDuplicatas.DataSource := LDm.dsNfeCobrDup;
+
+  // tabPagamentos — grdPagamentos → dsNfePag
+  grdPagamentos.DataSource := LDm.dsNfePag;
+
+  // tabProtocolo — dsNfeProtocolo (somente leitura)
+  edProtNProt.DataSource    := LDm.dsNfeProtocolo;
+  edProtDhRecbto.DataSource := LDm.dsNfeProtocolo;
+  edProtCStat.DataSource    := LDm.dsNfeProtocolo;
+  edProtXMotivo.DataSource  := LDm.dsNfeProtocolo;
+end;
+
+procedure TfrmNfe.InicializarFiltro;
+var
+  LHoje: TDate;
+begin
+  LHoje := Date;
+  edDataFim.Date := LHoje;
+  edDataIni.Date := EncodeDate(YearOf(LHoje), MonthOf(LHoje), 1);
+end;
+
+procedure TfrmNfe.btnConsultarClick(Sender: TObject);
+begin
+  if edDataIni.Date > edDataFim.Date then
+  begin
+    ShowMessage('A data inicial deve ser menor ou igual à data final.');
+    edDataIni.SetFocus;
+    Exit;
+  end;
+  TdmNfe(FdmNfe).AbrirComFiltro(edDataIni.Date, edDataFim.Date);
+end;
+
+procedure TfrmNfe.DoSalvar;
+var
+  LDm: TdmNfe;
+begin
+  LDm := TdmNfe(FdmNfe);
+  dmPrincipal.FDTransaction.StartTransaction;
+  try
+    LDm.Salvar;
+    dmPrincipal.FDTransaction.Commit;
+  except
+    dmPrincipal.FDTransaction.Rollback;
+    raise;
+  end;
+end;
+
+function TfrmNfe.ValidarCampos: Boolean;
+var
+  LDm: TdmNfe;
+begin
+  Result := False;
+  LDm := TdmNfe(FdmNfe);
+
+  if LDm.qryNfeIde.Active and
+     (LDm.qryNfeIde.FieldByName('nat_op').AsString = '') then
+  begin
+    ShowMessage('Natureza da operação é obrigatória.');
+    pgcNfe.ActivePage := tabIdentificacao;
+    edNatOp.SetFocus;
+    Exit;
+  end;
+
+  if LDm.qryNfeIde.Active and
+     (LDm.qryNfeIde.FieldByName('dh_emi').IsNull) then
+  begin
+    ShowMessage('Data de emissão é obrigatória.');
+    pgcNfe.ActivePage := tabIdentificacao;
+    edDhEmi.SetFocus;
+    Exit;
+  end;
+
+  if LDm.qryNfeDet.Active and LDm.qryNfeDet.IsEmpty then
+  begin
+    ShowMessage('A NF-e deve conter pelo menos um item.');
+    Exit;
+  end;
+
+  Result := True;
+end;
+
+end.

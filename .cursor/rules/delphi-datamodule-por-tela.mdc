@@ -1,0 +1,34 @@
+---
+description: Toda tela nova deve ter um DataModule próprio vinculado a ela — queries, datasets e conexão ficam no DM, nunca no form
+globs: "**/*.pas,**/*.dfm"
+alwaysApply: false
+---
+
+#### DataModule por tela — obrigatoriedade
+
+- Toda **tela nova** (`Tfrm*`) deve ter um **DataModule dedicado** (`Tdm*`) criado junto com ela.
+- O DM é o único lugar onde vivem: `TFDQuery`, `TFDTable`, `TDataSource`, lógica de persistência e transações da tela. A **conexão** (`TFDConnection`) fica exclusivamente no `TdmPrincipal` (ver `delphi-firedac-mysql.mdc`).
+- O form nunca declara `TFDQuery`, `TFDTable` ou `TDataSet` diretamente — acessa apenas via `TDataSource` ligado ao DM.
+
+#### Nomenclatura (alinhado com `delphi-nova-tela.mdc`)
+
+| Artefato | Padrão | Exemplo |
+|----------|--------|---------|
+| DataModule da tela | `Tdm` + mesmo sufixo do form | `TdmCliente`, `TdmNfe` |
+| Unit do DM | `uDm` + mesmo sufixo | `uDmCliente`, `uDmNfe` |
+| Variável global do DM | `dm` + sufixo (minúsculo) | `dmCliente`, `dmNfe` |
+
+#### Ciclo de vida
+
+- O DM é **criado pelo form** (ou pela unit de apresentação) no `OnCreate` / antes do primeiro uso e **liberado no `OnDestroy`** do form — o DM não gerencia seu próprio tempo de vida.
+- Não usar `Application.CreateForm` para DMs de tela; instanciar com `TdmXxx.Create(Self)` passando o form como Owner.
+
+#### Estrutura mínima esperada ao criar uma tela
+
+```
+uFrmCliente.pas   →  TfrmCliente    (form — UI e orquestração)
+uDmCliente.pas    →  TdmCliente     (DM  — dados e persistência)
+```
+
+- O form referencia `uDmCliente` na seção `uses` da implementação (não na interface, para evitar referência circular).
+- O DM não referencia o form.

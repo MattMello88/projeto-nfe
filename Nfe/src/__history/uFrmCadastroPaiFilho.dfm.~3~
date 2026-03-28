@@ -1,0 +1,85 @@
+inherited frmCadastroPaiFilho: TfrmCadastroPaiFilho
+  Caption = 'Cadastro Mestre-Detalhe'
+  StyleElements = [seFont, seClient, seBorder]
+  TextHeight = 15
+  inherited pnlTopo: TPanel
+    StyleElements = [seFont, seClient, seBorder]
+    inherited dbnavMestre: TDBNavigator
+      Hints.Strings = ()
+      StyleElements = [seFont, seClient, seBorder]
+    end
+  end
+  inherited pgcCadastro: TPageControl
+    inherited tabFormulario: TTabSheet
+      inherited pnlBotoesForm: TPanel
+        StyleElements = [seFont, seClient, seBorder]
+        ExplicitWidth = 790
+      end
+      inherited pnlCampos: TPanel
+        StyleElements = [seFont, seClient, seBorder]
+        ExplicitWidth = 790
+        ExplicitHeight = 397
+        object splMestreDetalhe: TSplitter
+          Left = 0
+          Top = 200
+          Width = 792
+          Height = 4
+          Cursor = crVSplit
+          Align = alTop
+          ResizeStyle = rsUpdate
+        end
+        object pnlMestre: TPanel
+          Left = 0
+          Top = 0
+          Width = 792
+          Height = 200
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 0
+          ExplicitWidth = 790
+        end
+        object pnlDetalhe: TPanel
+          Left = 0
+          Top = 204
+          Width = 792
+          Height = 201
+          Align = alClient
+          BevelOuter = bvNone
+          TabOrder = 1
+          ExplicitWidth = 790
+          ExplicitHeight = 193
+          object dbnavDetalhe: TDBNavigator
+            Left = 0
+            Top = 0
+            Width = 792
+            Height = 25
+            DataSource = dsDetalhe
+            VisibleButtons = [nbInsert, nbDelete, nbEdit, nbPost, nbCancel]
+            Align = alTop
+            TabOrder = 0
+            ExplicitWidth = 790
+          end
+          object grdItens: TDBGrid
+            Left = 0
+            Top = 25
+            Width = 792
+            Height = 176
+            Align = alClient
+            DataSource = dsDetalhe
+            TabOrder = 1
+            TitleFont.Charset = DEFAULT_CHARSET
+            TitleFont.Color = clWindowText
+            TitleFont.Height = -12
+            TitleFont.Name = 'Segoe UI'
+            TitleFont.Style = []
+          end
+        end
+      end
+    end
+  end
+  object dsDetalhe: TDataSource
+    OnStateChange = dsDetalheStateChange
+    Left = 40
+    Top = 516
+  end
+end

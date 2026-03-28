@@ -1,0 +1,10 @@
+; Configuração de conexão com o banco de dados MySQL
+; Copie este arquivo para a pasta do executável renomeando para Project1.ini
+; NUNCA versione o arquivo com senha real — use este modelo como referência
+
+[Database]
+Server=localhost
+Port=3306
+Database=nfe_db
+UserName=root
+Password=

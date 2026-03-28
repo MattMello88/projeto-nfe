@@ -1,0 +1,113 @@
+unit uFrmCadastroPaiFilho;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages,
+  System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ExtCtrls, Vcl.DBCtrls, Vcl.DBGrids,
+  Data.DB,
+  uFrmCadastroPai;
+
+type
+  TfrmCadastroPaiFilho = class(TfrmCadastroPai)
+    pnlMestre: TPanel;
+    splMestreDetalhe: TSplitter;
+    pnlDetalhe: TPanel;
+    dbnavDetalhe: TDBNavigator;
+    grdItens: TDBGrid;
+    dsDetalhe: TDataSource;
+    procedure dsDetalheStateChange(Sender: TObject);
+  protected
+    { Ações do detalhe — filhos sobrescrevem apenas se precisar de lógica extra }
+    procedure DoInserirFilho; virtual;
+    procedure DoExcluirFilho; virtual;
+    { Excel — filho sobrescreve para exportar mestre (aba 1) + detalhe (aba 2) }
+    procedure DoExportarExcel; override;
+    procedure DoImportarExcel; override;
+  end;
+
+{ Não instanciar diretamente — usar apenas como ancestral herdado }
+
+implementation
+
+{$R *.dfm}
+
+{ TfrmCadastroPaiFilho }
+
+procedure TfrmCadastroPaiFilho.dsDetalheStateChange(Sender: TObject);
+begin
+  { Estado do detalhe pode ser usado por telas filhas para habilitar/desabilitar
+    controles específicos do grid. Sobrescreva se necessário. }
+end;
+
+procedure TfrmCadastroPaiFilho.DoInserirFilho;
+begin
+  { Comportamento padrão: aciona Insert via TDBNavigator do detalhe.
+    A FK do pai (id_*) deve ser atribuída no evento BeforeInsert do dataset
+    no DataModule filho, não aqui. }
+  if Assigned(dsDetalhe.DataSet) then
+    dbnavDetalhe.BtnClick(nbInsert);
+end;
+
+procedure TfrmCadastroPaiFilho.DoExcluirFilho;
+begin
+  if not Assigned(dsDetalhe.DataSet) then
+    Exit;
+  if dsDetalhe.DataSet.IsEmpty then
+    Exit;
+  if MessageDlg('Confirma a exclusão do item selecionado?',
+                mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    dbnavDetalhe.BtnClick(nbDelete);
+end;
+
+procedure TfrmCadastroPaiFilho.DoExportarExcel;
+begin
+  {
+    Sobrescreva este método na tela filha para exportar mestre + detalhe
+    em abas separadas de um mesmo workbook NativeExcel.
+
+    Exemplo de estrutura esperada no filho:
+
+    procedure TfrmNfe.DoExportarExcel;
+    var
+      LSaveDialog: TSaveDialog;
+      LXls: TXLSFile;
+      LPlanMestre, LPlanDetalhe: IXLSWorksheet;
+    begin
+      LSaveDialog := TSaveDialog.Create(nil);
+      try
+        LSaveDialog.DefaultExt := 'xlsx';
+        LSaveDialog.Filter := 'Excel (*.xlsx)|*.xlsx';
+        if not LSaveDialog.Execute then Exit;
+
+        LXls := TXLSFile.Create;
+        try
+          LXls.NewFile(2); // 2 abas: mestre e detalhe
+          LPlanMestre  := LXls.GetSheet(0); LPlanMestre.Name  := 'NF-e';
+          LPlanDetalhe := LXls.GetSheet(1); LPlanDetalhe.Name := 'Itens';
+          // escrever colunas do mestre em LPlanMestre ...
+          // escrever colunas do detalhe em LPlanDetalhe ...
+          LXls.Save(LSaveDialog.FileName);
+        finally
+          LXls.Free;
+        end;
+      finally
+        LSaveDialog.Free;
+      end;
+    end;
+  }
+  inherited DoExportarExcel;
+end;
+
+procedure TfrmCadastroPaiFilho.DoImportarExcel;
+begin
+  {
+    Sobrescreva este método na tela filha para ler as abas do workbook,
+    validar cabeçalhos, FKs e importar mestre + detalhe em transação única.
+  }
+  inherited DoImportarExcel;
+end;
+
+end.

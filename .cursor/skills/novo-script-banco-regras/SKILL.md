@@ -26,11 +26,12 @@ description: >
 
 ## Checklist rápido (MySQL)
 
-- Tabela: singular, inglês, `PRIMARY KEY (id)` `INT UNSIGNED AUTO_INCREMENT`.
-- Colunas: inglês; monetário `DECIMAL(15,2)`; data `DATE`/`DATETIME`; booleano `TINYINT(1)`; CPF/CNPJ `VARCHAR(14)` só dígitos.
-- FK: `id_<tabela_referenciada>`, `CONSTRAINT fk_...`, `ON DELETE RESTRICT` salvo exceção justificada.
+- Tabela: singular, inglês, `CREATE TABLE IF NOT EXISTS`, `id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY`.
+- FK: `id_<tabela> INT UNSIGNED NOT NULL`, `CONSTRAINT fk_...`, `ON DELETE RESTRICT` salvo exceção.
+- Colunas: inglês; monetário `DECIMAL(15,2)`; data `DATE`/`DATETIME`; booleano `TINYINT(1)`; CPF `VARCHAR(11)`; CNPJ `VARCHAR(14)` (só dígitos).
 - `INDEX` em colunas de filtro/join/ordenação; `created_at` / `updated_at` conforme rule.
-- `ENGINE=InnoDB`, `CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci` na tabela (ou herdado do banco, se já padronizado).
+- `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci` em toda tabela.
+- Palavras reservadas MySQL proibidas como nome; nunca `FLOAT`/`DOUBLE` para valores financeiros.
 
 ## Regras Delphi relacionadas (avisar na revisão)
 
@@ -38,9 +39,12 @@ Use como **notas de implementação** na resposta ao usuário, sem substituir a 
 
 | Mudança no script | Rule a lembrar |
 |-------------------|----------------|
-| Nova coluna `id_*` (FK) | [delphi-lookup-referencias.mdc](../../rules/delphi-lookup-referencias.mdc) — tela com lookup de busca. |
-| `DATE` / `DATETIME` / `TIMESTAMP` em entidade que terá **lista por período** | [delphi-filtro-data-abertura-tela.mdc](../../rules/delphi-filtro-data-abertura-tela.mdc) — filtro de data obrigatório ao abrir. |
-| Cadastro mestre-detalhe no mesmo domínio | [delphi-ancestral-cadastro-master-detail.mdc](../../rules/delphi-ancestral-cadastro-master-detail.mdc) + [delphi-formulario-boas-praticas.mdc](../../rules/delphi-formulario-boas-praticas.mdc). |
+| Nova entidade / tabela | [delphi-datamodule-por-tela.mdc](../../rules/delphi-datamodule-por-tela.mdc) — criar `TdmXxx` junto com `TfrmXxx`; `TFDQuery` no DM. |
+| Nova entidade / tabela | [delphi-firedac-mysql.mdc](../../rules/delphi-firedac-mysql.mdc) — usar FireDAC (`TFDQuery`); conexão via `TdmPrincipal.FDConnection`. |
+| Nova coluna `id_*` (FK) | [delphi-lookup-referencias.mdc](../../rules/delphi-lookup-referencias.mdc) — lookup `lkp*` com busca na tela. |
+| `DATE` / `DATETIME` / `TIMESTAMP` em entidade de listagem | [delphi-filtro-data-abertura-tela.mdc](../../rules/delphi-filtro-data-abertura-tela.mdc) — filtro por data obrigatório ao abrir; padrão 1º dia do mês atual → hoje. |
+| Cadastro mestre-detalhe | [delphi-ancestral-cadastro-master-detail.mdc](../../rules/delphi-ancestral-cadastro-master-detail.mdc) — herdar `TfrmCadastroPaiFilho`; Excel no ancestral. |
+| Qualquer tela nova | [delphi-formulario-boas-praticas.mdc](../../rules/delphi-formulario-boas-praticas.mdc) — Owner, ModalResult, queries no DM, não no form. |
 
 ## Saída esperada
 

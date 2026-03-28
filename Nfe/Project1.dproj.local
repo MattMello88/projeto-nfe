@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2026/03/28 15:29:59.859,=C:\Users\mathe\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2026/03/28 15:30:31.807,C:\Users\mathe\Documents\Embarcadero\Studio\projeto-nfe\Nfe\src\uMain.pas=C:\Users\mathe\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2026/03/28 15:30:31.807,C:\Users\mathe\Documents\Embarcadero\Studio\projeto-nfe\Nfe\src\uMain.dfm=C:\Users\mathe\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2026/03/28 15:30:36.078,C:\Users\mathe\Documents\Embarcadero\Studio\projeto-nfe\Nfe\Project1.dproj=C:\Users\mathe\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2026/03/28 15:41:48.825,=C:\Users\mathe\Documents\Embarcadero\Studio\projeto-nfe\Nfe\src\uFrmCadastroPai.pas</Transaction>
+    <Transaction>2026/03/28 15:41:49.031,=C:\Users\mathe\Documents\Embarcadero\Studio\projeto-nfe\Nfe\src\uFrmCadastroPaiFilho.pas</Transaction>
+  </Transactions>
+</BorlandProject>

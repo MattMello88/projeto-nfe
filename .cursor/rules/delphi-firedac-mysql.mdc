@@ -1,0 +1,70 @@
+---
+description: Uso obrigatório de FireDAC com MySQL; conexão centralizada no DM principal; DMs de tela reusam a conexão do DM principal
+globs: "**/*.pas,**/*.dfm"
+alwaysApply: true
+---
+
+#### FireDAC + MySQL — padrão do projeto
+
+- O projeto usa **FireDAC** como camada de acesso a dados — nunca `BDE`, `dbExpress`, `ADO` ou outra tecnologia.
+- Banco de dados: **MySQL** (driver FireDAC `MySQL`).
+
+#### Conexão — DM principal
+
+- Existe um **único `TFDConnection`** no projeto, declarado no **DataModule principal** (`TdmPrincipal` / `uDmPrincipal`).
+- Nenhum outro DM ou form declara `TFDConnection` próprio — todos referenciam o do DM principal via propriedade `Connection`.
+- O DM principal é criado via `Application.CreateForm` (único caso permitido para DM de infraestrutura) e fica ativo durante toda a sessão.
+
+#### Componentes FireDAC por camada
+
+| Componente | Onde fica | Observação |
+|------------|-----------|------------|
+| `TFDConnection` | `TdmPrincipal` | único no projeto |
+| `TFDTransaction` | `TdmPrincipal` | transação padrão + transação de leitura se necessário |
+| `TFDQuery` | DM da tela (`Tdm*`) | `Connection` → `dmPrincipal.FDConnection` |
+| `TFDTable` | DM da tela (evitar; preferir `TFDQuery`) | idem |
+| `TDataSource` | DM da tela | liga `TFDQuery` ao form |
+| `TFDLocalSQL` / `TFDMemTable` | DM da tela quando necessário | sem conexão direta |
+
+#### Configuração da conexão (`TFDConnection`)
+
+```
+DriverID   = MySQL
+Server     = <host>
+Database   = <nome_do_banco>
+UserName   = <usuario>
+Password   = <senha>
+CharacterSet = utf8mb4
+```
+
+- `LoginPrompt = False`; credenciais via arquivo `.ini` de configuração ou parâmetros em runtime — **nunca** hard-coded no DFM ou código-fonte.
+- `Connected` definido em runtime (no `OnCreate` do DM principal ou na inicialização da aplicação), não em design-time.
+
+#### Transações
+
+- Usar `TFDTransaction` explícito para operações de escrita (`Insert`/`Update`/`Delete`).
+- Padrão: `StartTransaction` → operações → `Commit`; em exceção → `Rollback`.
+- Leituras simples podem usar a transação auto-commit padrão do FireDAC.
+
+#### Exemplo — DM de tela referenciando a conexão principal
+
+```pascal
+// uDmCliente.pas
+uses uDmPrincipal;
+
+procedure TdmCliente.ConfigurarConexao;
+begin
+  qryCliente.Connection := dmPrincipal.FDConnection;
+end;
+```
+
+#### Nomenclatura dos componentes FireDAC (alinhado com `delphi-nova-tela.mdc`)
+
+| Componente | Prefixo | Exemplo |
+|------------|---------|---------|
+| `TFDQuery` | `qry` | `qryCliente`, `qryItensPedido` |
+| `TFDTable` | `tbl` | `tblProduto` |
+| `TFDMemTable` | `mt` | `mtResumo` |
+| `TDataSource` | `ds` | `dsCliente`, `dsItens` |
+| `TFDConnection` | `FDConnection` | `FDConnection` (único, no DM principal) |
+| `TFDTransaction` | `FDTransaction` | `FDTransaction`, `FDTransactionLeitura` |

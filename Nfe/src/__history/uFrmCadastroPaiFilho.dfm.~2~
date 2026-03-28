@@ -1,0 +1,62 @@
+inherited frmCadastroPaiFilho: TfrmCadastroPaiFilho
+  Caption = 'Cadastro Mestre-Detalhe'
+  inherited pgcCadastro: TPageControl
+    inherited tabFormulario: TTabSheet
+      inherited pnlCampos: TPanel
+        object pnlMestre: TPanel
+          Left = 0
+          Top = 0
+          Width = 792
+          Height = 200
+          Align = alTop
+          BevelOuter = bvNone
+          Caption = ''
+          TabOrder = 0
+        end
+        object splMestreDetalhe: TSplitter
+          Left = 0
+          Top = 200
+          Width = 792
+          Height = 4
+          Cursor = crVSplit
+          Align = alTop
+          ResizeStyle = rsUpdate
+        end
+        object pnlDetalhe: TPanel
+          Left = 0
+          Top = 204
+          Width = 792
+          Height = 203
+          Align = alClient
+          BevelOuter = bvNone
+          Caption = ''
+          TabOrder = 1
+          object dbnavDetalhe: TDBNavigator
+            Left = 0
+            Top = 0
+            Width = 241
+            Height = 25
+            DataSource = dsDetalhe
+            VisibleButtons = [nbInsert, nbDelete, nbEdit, nbPost, nbCancel]
+            Align = alTop
+            TabOrder = 0
+          end
+          object grdItens: TDBGrid
+            Left = 0
+            Top = 25
+            Width = 792
+            Height = 178
+            Align = alClient
+            DataSource = dsDetalhe
+            TabOrder = 1
+          end
+        end
+      end
+    end
+  end
+  object dsDetalhe: TDataSource
+    OnStateChange = dsDetalheStateChange
+    Left = 40
+    Top = 516
+  end
+end
